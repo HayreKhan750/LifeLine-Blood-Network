@@ -1,0 +1,54 @@
+<?php
+require_once '../includes/functions.php';
+requireAdmin();
+
+$stmt = $pdo->query("
+    SELECT br.*, hp.hospital_name
+    FROM blood_requests br
+    JOIN hospital_profiles hp ON br.hospital_id = hp.user_id
+    ORDER BY br.created_at DESC
+");
+$requests = $stmt->fetchAll();
+
+include '../includes/header.php';
+?>
+
+<div class="card">
+    <div class="card-header">
+        <h1>Manage Blood Requests</h1>
+        <a href="<?php echo baseUrl(); ?>/admin/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Hospital</th>
+                <th>Patient Type</th>
+                <th>Units</th>
+                <th>Urgency</th>
+                <th>Status</th>
+                <th>Required By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($requests as $r): ?>
+            <tr>
+                <td>#<?php echo (int)$r['id']; ?></td>
+                <td><?php echo htmlspecialchars($r['hospital_name']); ?></td>
+                <td><?php echo htmlspecialchars($r['patient_blood_type']); ?></td>
+                <td><?php echo (int)$r['units_needed']; ?></td>
+                <td><?php echo ucfirst($r['urgency']); ?></td>
+                <td><?php echo ucfirst($r['status']); ?></td>
+                <td><?php echo $r['required_date'] ? htmlspecialchars($r['required_date']) : 'ASAP'; ?></td>
+                <td>
+                    <a href="<?php echo baseUrl(); ?>/admin/edit_record.php?type=request&id=<?php echo (int)$r['id']; ?>" class="btn btn-small">Edit</a>
+                    <a href="<?php echo baseUrl(); ?>/admin/delete_record.php?type=request&id=<?php echo (int)$r['id']; ?>" class="btn btn-small" style="background:#991b1b;">Delete</a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<?php include '../includes/footer.php'; ?>

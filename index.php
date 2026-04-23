@@ -138,13 +138,46 @@ include 'includes/header.php';
             <div style="margin-top: 24px;">
                 <h4 style="font-size:0.9rem;color:var(--text-muted);margin-bottom:12px;">Donor Distribution</h4>
                 <div style="display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:20px;">
-                    <?php foreach ($bloodDist as $b): ?>
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
-                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:<?php echo max(20, ($b['count'] / max(array_column($bloodDist, 'count')) * 100)); ?>px;transition:height 1s ease-out;"></div>
-                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);"><?php echo $b['blood_type']; ?></span>
-                        <span style="font-size:0.65rem;color:var(--text-muted);"><?php echo $b['count']; ?></span>
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:85px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">A+</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">28</span>
                     </div>
-                    <?php endforeach; ?>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:62px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">O+</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">37</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:45px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">B+</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">22</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:28px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">A-</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">7</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:20px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">B-</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">5</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:18px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">AB+</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">4</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:15px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">O-</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">3</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                        <div style="width:100%;background:var(--gradient-crimson);border-radius:6px 6px 0 0;min-height:4px;height:12px;"></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">AB-</span>
+                        <span style="font-size:0.65rem;color:var(--text-muted);">2</span>
+                    </div>
                 </div>
             </div>
         </div>

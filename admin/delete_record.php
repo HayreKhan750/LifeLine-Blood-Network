@@ -30,11 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Deleting user cascades to profile and matches
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         $stmt->execute([$id]);
+        auditLog($pdo, 'delete', $type, $id, ['label' => $label]);
         setFlash(ucfirst($type) . ' record deleted successfully.', 'success');
         redirect(baseUrl() . '/admin/manage_' . $type . 's.php');
     } elseif ($type === 'request') {
         $stmt = $pdo->prepare("DELETE FROM blood_requests WHERE id = ?");
         $stmt->execute([$id]);
+        auditLog($pdo, 'delete', 'request', $id, ['label' => $label]);
         setFlash('Blood request deleted successfully.', 'success');
         redirect(baseUrl() . '/admin/manage_requests.php');
     }

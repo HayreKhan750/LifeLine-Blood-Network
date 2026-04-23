@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS donor_profiles (
     city VARCHAR(50),
     state VARCHAR(50),
     country VARCHAR(50) DEFAULT 'India',
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
     date_of_birth DATE,
     gender ENUM('male','female','other'),
     last_donation_date DATE,
@@ -39,6 +41,8 @@ CREATE TABLE IF NOT EXISTS hospital_profiles (
     city VARCHAR(50),
     state VARCHAR(50),
     country VARCHAR(50) DEFAULT 'India',
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
     license_number VARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -53,6 +57,8 @@ CREATE TABLE IF NOT EXISTS blood_requests (
     required_date DATE,
     city VARCHAR(50),
     state VARCHAR(50),
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
     hospital_address TEXT,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

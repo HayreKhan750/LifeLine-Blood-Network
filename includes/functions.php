@@ -311,3 +311,94 @@ function getPatientBloodTypesForDonor(string $donorType): array {
     ];
     return $map[$donorType] ?? [];
 }
+
+// Geolocation: Convert city/state to lat/lng using Nominatim (OpenStreetMap)
+function geocodeLocation(string $city, string $state, string $country = 'India'): ?array {
+    $query = trim($city . ', ' . $state . ', ' . $country);
+    $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
+        'q' => $query,
+        'format' => 'json',
+        'limit' => 1,
+        'countrycodes' => 'in'
+    ]);
+    
+    $opts = [
+        'http' => [
+            'header' => "User-Agent: LifeLineBloodNetwork/1.0\r\n"
+        ]
+    ];
+    $context = stream_context_create($opts);
+    $response = @file_get_contents($url, false, $context);
+    
+    if ($response === false) {
+        return null;
+    }
+    
+    $data = json_decode($response, true);
+    if (!empty($data) && isset($data[0]['lat']) && isset($data[0]['lon'])) {
+        return [
+            'latitude' => (float)$data[0]['lat'],
+            'longitude' => (float)$data[0]['lon']
+        ];
+    }
+    
+    return null;
+}
+
+// Calculate distance between two points using Haversine formula (km)
+function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float {
+    $earthRadius = 6371; // km
+    $dLat = deg2rad($lat2 - $lat1);
+    $dLon = deg2rad($lon2 - $lon1);
+    $a = sin($dLat / 2) * sin($dLat / 2) +
+         cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+         sin($dLon / 2) * sin($dLon / 2);
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    return $earthRadius * $c;
+}
+
+// Audit logging
+function auditLog(PDO $pdo, string $action, string $entityType, ?int $entityId = null, ?array $oldValues = null, ?array $newValues = null): void {
+    $userId = $_SESSION['user_id'] ?? null;
+    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+    
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO audit_logs (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $userId,
+            $action,
+            $entityType,
+            $entityId,
+            $oldValues ? json_encode($oldValues) : null,
+            $newValues ? json_encode($newValues) : null,
+            $ipAddress,
+            substr($userAgent, 0, 500)
+        ]);
+    } catch (Exception $e) {
+        error_log("Audit log failed: " . $e->getMessage());
+    }
+}
+
+// CSV export helper
+function exportToCsv(array $headers, array $rows, string $filename): void {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+    
+    $output = fopen('php://output', 'w');
+    // BOM for Excel UTF-8 compatibility
+    fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    
+    fputcsv($output, $headers);
+    foreach ($rows as $row) {
+        fputcsv($output, $row);
+    }
+    
+    fclose($output);
+    exit;
+}

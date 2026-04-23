@@ -50,6 +50,11 @@ include '../includes/header.php';
         <p>Oversee all blood requests and delete incorrect entries.</p>
         <span class="btn" style="margin-top:10px;">Open</span>
     </a>
+    <a href="<?php echo baseUrl(); ?>/admin/activity.php" class="card" style="text-decoration:none; color:inherit;">
+        <h2>Activity & Audit Logs</h2>
+        <p>View system activity, login history, and export data to CSV.</p>
+        <span class="btn" style="margin-top:10px;">Open</span>
+    </a>
 </div>
 
 <?php include '../includes/footer.php'; ?>

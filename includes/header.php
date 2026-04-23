@@ -7,23 +7,27 @@ $flash = getFlash();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Blood Donor & Emergency Matching System</title>
+    <meta name="description" content="LifeLine Blood Network - Connect blood donors with hospitals in emergencies. Find compatible donors, create urgent requests, save lives.">
+    <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?>LifeLine Blood Network</title>
     <link rel="stylesheet" href="<?php echo baseUrl(); ?>/assets/css/style.css">
 </head>
 <body>
 <header>
     <div class="container nav-container">
         <a href="<?php echo baseUrl(); ?>/index.php" class="logo">LifeLine Blood Network</a>
+        <button class="mobile-menu-toggle" onclick="document.querySelector('header nav').classList.toggle('active')" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav>
             <a href="<?php echo baseUrl(); ?>/index.php">Home</a>
             <a href="<?php echo baseUrl(); ?>/find_donors.php">Find Donors</a>
             <?php if (isLoggedIn()): ?>
                 <?php if (isAdmin()): ?>
-                    <a href="<?php echo baseUrl(); ?>/admin/dashboard.php">Admin Dashboard</a>
+                    <a href="<?php echo baseUrl(); ?>/admin/dashboard.php">Admin</a>
                 <?php elseif (isDonor()): ?>
-                    <a href="<?php echo baseUrl(); ?>/donor/dashboard.php">My Dashboard</a>
+                    <a href="<?php echo baseUrl(); ?>/donor/dashboard.php">Dashboard</a>
                 <?php elseif (isHospital()): ?>
-                    <a href="<?php echo baseUrl(); ?>/hospital/dashboard.php">Hospital Dashboard</a>
+                    <a href="<?php echo baseUrl(); ?>/hospital/dashboard.php">Dashboard</a>
                 <?php endif; ?>
                 <a href="<?php echo baseUrl(); ?>/logout.php">Logout</a>
             <?php else: ?>

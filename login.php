@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['role'] = $user['role'];
         $_SESSION['email'] = $user['email'];
         session_regenerate_id(true);
+        auditLog($pdo, 'login', 'user', $user['id'], null, ['role' => $user['role']]);
         setFlash('Login successful. Welcome back!', 'success');
         if ($user['role'] === 'admin') {
             redirect(baseUrl() . '/admin/dashboard.php');
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         recordLoginAttempt($identifier);
+        auditLog($pdo, 'login_failed', 'user', null, null, ['email' => $email]);
         $remaining = getRateLimitRemaining($identifier);
         $msg = 'Invalid email or password.';
         if ($remaining['attempts_remaining'] > 0 && $remaining['attempts_remaining'] < 5) {

@@ -1,6 +1,176 @@
 <?php
 require_once __DIR__ . '/db.php';
 
+// Rate limiting for login attempts
+function isRateLimited(string $identifier): bool {
+    $maxAttempts = Config::getInt('MAX_LOGIN_ATTEMPTS', 5);
+    $lockoutMinutes = Config::getInt('LOGIN_LOCKOUT_MINUTES', 15);
+    
+    $key = 'login_attempts_' . md5($identifier);
+    $lockoutKey = 'login_lockout_' . md5($identifier);
+    
+    // Check if currently locked out
+    if (isset($_SESSION[$lockoutKey]) && $_SESSION[$lockoutKey] > time()) {
+        return true;
+    }
+    
+    // Clear expired lockout
+    if (isset($_SESSION[$lockoutKey]) && $_SESSION[$lockoutKey] <= time()) {
+        unset($_SESSION[$lockoutKey]);
+        unset($_SESSION[$key]);
+    }
+    
+    return false;
+}
+
+function recordLoginAttempt(string $identifier): void {
+    $maxAttempts = Config::getInt('MAX_LOGIN_ATTEMPTS', 5);
+    $lockoutMinutes = Config::getInt('LOGIN_LOCKOUT_MINUTES', 15);
+    
+    $key = 'login_attempts_' . md5($identifier);
+    $lockoutKey = 'login_lockout_' . md5($identifier);
+    
+    if (!isset($_SESSION[$key])) {
+        $_SESSION[$key] = ['count' => 0, 'first_attempt' => time()];
+    }
+    
+    $_SESSION[$key]['count']++;
+    $_SESSION[$key]['last_attempt'] = time();
+    
+    // Lock out after max attempts
+    if ($_SESSION[$key]['count'] >= $maxAttempts) {
+        $_SESSION[$lockoutKey] = time() + ($lockoutMinutes * 60);
+        error_log("Rate limit triggered for: " . $identifier);
+    }
+}
+
+function clearLoginAttempts(string $identifier): void {
+    $key = 'login_attempts_' . md5($identifier);
+    $lockoutKey = 'login_lockout_' . md5($identifier);
+    unset($_SESSION[$key]);
+    unset($_SESSION[$lockoutKey]);
+}
+
+function getRateLimitRemaining(string $identifier): array {
+    $maxAttempts = Config::getInt('MAX_LOGIN_ATTEMPTS', 5);
+    $lockoutMinutes = Config::getInt('LOGIN_LOCKOUT_MINUTES', 15);
+    
+    $key = 'login_attempts_' . md5($identifier);
+    $lockoutKey = 'login_lockout_' . md5($identifier);
+    
+    if (isset($_SESSION[$lockoutKey]) && $_SESSION[$lockoutKey] > time()) {
+        $remaining = $_SESSION[$lockoutKey] - time();
+        return [
+            'locked' => true,
+            'minutes_remaining' => ceil($remaining / 60),
+            'attempts_remaining' => 0
+        ];
+    }
+    
+    $attempts = $_SESSION[$key]['count'] ?? 0;
+    return [
+        'locked' => false,
+        'minutes_remaining' => 0,
+        'attempts_remaining' => max(0, $maxAttempts - $attempts)
+    ];
+}
+
+// Password validation
+function validatePassword(string $password): array {
+    $errors = [];
+    
+    if (strlen($password) < 8) {
+        $errors[] = 'Password must be at least 8 characters long';
+    }
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = 'Password must contain at least one uppercase letter';
+    }
+    if (!preg_match('/[a-z]/', $password)) {
+        $errors[] = 'Password must contain at least one lowercase letter';
+    }
+    if (!preg_match('/[0-9]/', $password)) {
+        $errors[] = 'Password must contain at least one number';
+    }
+    if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+        $errors[] = 'Password must contain at least one special character';
+    }
+    
+    return $errors;
+}
+
+// Input sanitization helpers
+function sanitizeEmail(string $email): string {
+    return filter_var(trim($email), FILTER_SANITIZE_EMAIL);
+}
+
+function sanitizeString(string $text): string {
+    return htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8');
+}
+
+function validatePhone(string $phone): bool {
+    // Basic international phone validation
+    return preg_match('/^[\+]?[\d\s\-\(\)]{8,20}$/', $phone) === 1;
+}
+
+// Pagination helper
+function getPaginationParams(int $defaultPerPage = 25): array {
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $perPage = isset($_GET['per_page']) ? max(5, min(100, (int)$_GET['per_page'])) : $defaultPerPage;
+    $offset = ($page - 1) * $perPage;
+    
+    return [
+        'page' => $page,
+        'per_page' => $perPage,
+        'offset' => $offset
+    ];
+}
+
+function renderPagination(int $currentPage, int $totalPages, int $perPage, string $baseUrl): string {
+    if ($totalPages <= 1) {
+        return '';
+    }
+    
+    $html = '<div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; flex-wrap: wrap;">';
+    
+    // Previous button
+    if ($currentPage > 1) {
+        $prevUrl = $baseUrl . (strpos($baseUrl, '?') !== false ? '&' : '?') . 'page=' . ($currentPage - 1) . '&per_page=' . $perPage;
+        $html .= '<a href="' . $prevUrl . '" class="btn btn-small btn-secondary">&larr; Previous</a>';
+    }
+    
+    // Page numbers
+    $startPage = max(1, $currentPage - 2);
+    $endPage = min($totalPages, $currentPage + 2);
+    
+    if ($startPage > 1) {
+        $html .= '<span style="padding: 6px 12px;">...</span>';
+    }
+    
+    for ($i = $startPage; $i <= $endPage; $i++) {
+        if ($i === $currentPage) {
+            $html .= '<span class="btn btn-small" style="background: #b91c1c; cursor: default;">' . $i . '</span>';
+        } else {
+            $pageUrl = $baseUrl . (strpos($baseUrl, '?') !== false ? '&' : '?') . 'page=' . $i . '&per_page=' . $perPage;
+            $html .= '<a href="' . $pageUrl . '" class="btn btn-small btn-secondary">' . $i . '</a>';
+        }
+    }
+    
+    if ($endPage < $totalPages) {
+        $html .= '<span style="padding: 6px 12px;">...</span>';
+    }
+    
+    // Next button
+    if ($currentPage < $totalPages) {
+        $nextUrl = $baseUrl . (strpos($baseUrl, '?') !== false ? '&' : '?') . 'page=' . ($currentPage + 1) . '&per_page=' . $perPage;
+        $html .= '<a href="' . $nextUrl . '" class="btn btn-small btn-secondary">Next &rarr;</a>';
+    }
+    
+    $html .= '</div>';
+    $html .= '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 10px;">Page ' . $currentPage . ' of ' . $totalPages . '</p>';
+    
+    return $html;
+}
+
 // Redirect helper
 function redirect(string $url): void {
     header("Location: " . $url);

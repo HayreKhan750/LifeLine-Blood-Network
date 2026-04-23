@@ -2,12 +2,25 @@
 require_once '../includes/functions.php';
 requireAdmin();
 
-$stmt = $pdo->query("
+// Pagination
+$pagination = getPaginationParams(25);
+$page = $pagination['page'];
+$perPage = $pagination['per_page'];
+$offset = $pagination['offset'];
+
+// Get total count
+$totalCount = $pdo->query("SELECT COUNT(*) FROM donor_profiles")->fetchColumn();
+$totalPages = (int)ceil($totalCount / $perPage);
+
+// Get paginated donors
+$stmt = $pdo->prepare("
     SELECT dp.*, u.email, u.is_active, u.id as user_id
     FROM donor_profiles dp
     JOIN users u ON dp.user_id = u.id
     ORDER BY dp.id DESC
+    LIMIT ? OFFSET ?
 ");
+$stmt->execute([$perPage, $offset]);
 $donors = $stmt->fetchAll();
 
 include '../includes/header.php';
@@ -49,6 +62,8 @@ include '../includes/header.php';
             <?php endforeach; ?>
         </tbody>
     </table>
+    
+    <?php echo renderPagination($page, $totalPages, $perPage, baseUrl() . '/admin/manage_donors.php'); ?>
 </div>
 
 <?php include '../includes/footer.php'; ?>

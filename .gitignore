@@ -1,0 +1,44 @@
+# LifeLine Blood Network - Git Ignore
+
+# Environment configuration (contains sensitive data)
+.env
+
+# Dependencies
+/vendor/
+composer.lock
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+/logs/
+
+# Cache
+/cache/
+*.cache
+
+# Session files (if file-based)
+/sessions/
+
+# Uploads
+/uploads/
+/tmp/
+
+# Backup files
+*.bak
+*.backup
+*.sql.gz
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# PHP specific
+.phpunit.result.cache
+phpunit.xml

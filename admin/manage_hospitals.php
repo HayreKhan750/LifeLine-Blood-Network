@@ -2,12 +2,25 @@
 require_once '../includes/functions.php';
 requireAdmin();
 
-$stmt = $pdo->query("
+// Pagination
+$pagination = getPaginationParams(25);
+$page = $pagination['page'];
+$perPage = $pagination['per_page'];
+$offset = $pagination['offset'];
+
+// Get total count
+$totalCount = $pdo->query("SELECT COUNT(*) FROM hospital_profiles")->fetchColumn();
+$totalPages = (int)ceil($totalCount / $perPage);
+
+// Get paginated hospitals
+$stmt = $pdo->prepare("
     SELECT hp.*, u.email, u.is_active, u.id as user_id
     FROM hospital_profiles hp
     JOIN users u ON hp.user_id = u.id
     ORDER BY hp.id DESC
+    LIMIT ? OFFSET ?
 ");
+$stmt->execute([$perPage, $offset]);
 $hospitals = $stmt->fetchAll();
 
 include '../includes/header.php';
@@ -47,6 +60,8 @@ include '../includes/header.php';
             <?php endforeach; ?>
         </tbody>
     </table>
+    
+    <?php echo renderPagination($page, $totalPages, $perPage, baseUrl() . '/admin/manage_hospitals.php'); ?>
 </div>
 
 <?php include '../includes/footer.php'; ?>

@@ -22,7 +22,10 @@ include '../includes/header.php';
             <h1><?php echo htmlspecialchars($profile['hospital_name']); ?></h1>
             <p style="margin:0;color:#6b7280;">Hospital Dashboard</p>
         </div>
-        <a href="<?php echo baseUrl(); ?>/hospital/create_request.php" class="btn">+ New Blood Request</a>
+        <div style="display: flex; gap: 10px;">
+            <a href="<?php echo baseUrl(); ?>/hospital/edit_profile.php" class="btn btn-secondary">Edit Profile</a>
+            <a href="<?php echo baseUrl(); ?>/hospital/create_request.php" class="btn">+ New Request</a>
+        </div>
     </div>
     <div style="margin-top: 10px;">
         <p><strong>License:</strong> <?php echo htmlspecialchars($profile['license_number']); ?> &middot; <strong>Phone:</strong> <?php echo htmlspecialchars($profile['phone']); ?></p>

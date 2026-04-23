@@ -1,114 +1,107 @@
 <?php
 require_once '../includes/functions.php';
-requireDonor();
+requireHospital();
 
 $userId = $_SESSION['user_id'];
-$profile = getDonorProfile($pdo, $userId);
+$profile = getHospitalProfile($pdo, $userId);
+
+// Get user data for email
+$stmt = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+$stmt->execute([$userId]);
+$user = $stmt->fetch();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validateCsrf();
-
-    // Update donor profile
+    
+    // Update hospital profile
     $stmt = $pdo->prepare("
-        UPDATE donor_profiles SET
-            full_name = ?,
+        UPDATE hospital_profiles SET
+            hospital_name = ?,
             phone = ?,
-            blood_type = ?,
             address = ?,
             city = ?,
             state = ?,
             country = ?,
-            date_of_birth = ?,
-            gender = ?,
-            last_donation_date = ?,
-            is_available = ?
+            license_number = ?
         WHERE user_id = ?
     ");
     $stmt->execute([
-        trim($_POST['full_name'] ?? ''),
+        trim($_POST['hospital_name'] ?? ''),
         trim($_POST['phone'] ?? ''),
-        $_POST['blood_type'] ?? '',
         trim($_POST['address'] ?? ''),
         trim($_POST['city'] ?? ''),
         trim($_POST['state'] ?? ''),
         trim($_POST['country'] ?? 'India'),
-        $_POST['date_of_birth'] ?: null,
-        $_POST['gender'] ?? null,
-        $_POST['last_donation_date'] ?: null,
-        isset($_POST['is_available']) ? 1 : 0,
+        trim($_POST['license_number'] ?? ''),
         $userId
     ]);
-
+    
     // Update email if changed
     $newEmail = sanitizeEmail($_POST['email'] ?? '');
-    if ($newEmail && $newEmail !== $_SESSION['email']) {
+    if ($newEmail && $newEmail !== $user['email']) {
         // Check if email already exists
         $check = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
         $check->execute([$newEmail, $userId]);
         if ($check->fetch()) {
             setFlash('Email address is already in use by another account.', 'danger');
-            redirect(baseUrl() . '/donor/edit_profile.php');
+            redirect(baseUrl() . '/hospital/edit_profile.php');
         }
         
         $stmt = $pdo->prepare("UPDATE users SET email = ? WHERE id = ?");
         $stmt->execute([$newEmail, $userId]);
         $_SESSION['email'] = $newEmail;
     }
-
+    
     // Handle password change
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
-
+    
     if ($newPassword) {
         // Verify current password
         $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $currentHash = $stmt->fetchColumn();
-
+        
         if (!password_verify($currentPassword, $currentHash)) {
             setFlash('Current password is incorrect.', 'danger');
-            redirect(baseUrl() . '/donor/edit_profile.php');
+            redirect(baseUrl() . '/hospital/edit_profile.php');
         }
-
+        
         // Validate new password
         $passwordErrors = validatePassword($newPassword);
         if (!empty($passwordErrors)) {
             setFlash(implode('<br>', $passwordErrors), 'danger');
-            redirect(baseUrl() . '/donor/edit_profile.php');
+            redirect(baseUrl() . '/hospital/edit_profile.php');
         }
-
+        
         if ($newPassword !== $confirmPassword) {
             setFlash('New passwords do not match.', 'danger');
-            redirect(baseUrl() . '/donor/edit_profile.php');
+            redirect(baseUrl() . '/hospital/edit_profile.php');
         }
-
+        
         // Update password
         $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
         $stmt->execute([$newHash, $userId]);
-
+        
         setFlash('Profile and password updated successfully.', 'success');
-        redirect(baseUrl() . '/donor/dashboard.php');
+        redirect(baseUrl() . '/hospital/dashboard.php');
     } else {
         setFlash('Profile updated successfully.', 'success');
-        redirect(baseUrl() . '/donor/edit_profile.php');
+        redirect(baseUrl() . '/hospital/edit_profile.php');
     }
 }
-
-// Get current user data
-$stmt = $pdo->prepare("SELECT email FROM users WHERE id = ?");
-$stmt->execute([$userId]);
-$user = $stmt->fetch();
 
 include '../includes/header.php';
 ?>
 
 <div class="card" style="max-width: 650px; margin: 30px auto;">
-    <h1>Edit Profile</h1>
+    <h1>Edit Hospital Profile</h1>
+    
     <form method="POST" action="">
         <input type="hidden" name="csrf_token" value="<?php echo csrfToken(); ?>">
-
+        
         <h3 style="margin-top: 20px; color: #b91c1c;">Account Information</h3>
         
         <div class="form-group">
@@ -116,63 +109,48 @@ include '../includes/header.php';
             <input type="email" id="email" name="email" required 
                    value="<?php echo htmlspecialchars($user['email']); ?>">
         </div>
-
-        <h3 style="margin-top: 30px; color: #b91c1c;">Personal Information</h3>
-
+        
+        <h3 style="margin-top: 30px; color: #b91c1c;">Hospital Details</h3>
+        
         <div class="form-group">
-            <label for="full_name">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required value="<?php echo htmlspecialchars($profile['full_name']); ?>">
+            <label for="hospital_name">Hospital Name</label>
+            <input type="text" id="hospital_name" name="hospital_name" required 
+                   value="<?php echo htmlspecialchars($profile['hospital_name']); ?>">
         </div>
+        
         <div class="form-group">
             <label for="phone">Phone Number</label>
-            <input type="text" id="phone" name="phone" required value="<?php echo htmlspecialchars($profile['phone']); ?>">
+            <input type="text" id="phone" name="phone" required 
+                   value="<?php echo htmlspecialchars($profile['phone']); ?>">
         </div>
+        
         <div class="form-group">
-            <label for="blood_type">Blood Type</label>
-            <select id="blood_type" name="blood_type" required>
-                <?php $types = ['A+','A-','B+','B-','AB+','AB-','O+','O-']; ?>
-                <?php foreach ($types as $t): ?>
-                    <option value="<?php echo $t; ?>" <?php echo ($profile['blood_type'] === $t) ? 'selected' : ''; ?>><?php echo $t; ?></option>
-                <?php endforeach; ?>
-            </select>
+            <label for="license_number">License Number</label>
+            <input type="text" id="license_number" name="license_number" required 
+                   value="<?php echo htmlspecialchars($profile['license_number']); ?>">
         </div>
-        <div class="form-group">
-            <label for="date_of_birth">Date of Birth</label>
-            <input type="date" id="date_of_birth" name="date_of_birth" value="<?php echo htmlspecialchars($profile['date_of_birth'] ?? ''); ?>">
-        </div>
-        <div class="form-group">
-            <label for="gender">Gender</label>
-            <select id="gender" name="gender">
-                <option value="">-- Select --</option>
-                <option value="male" <?php echo ($profile['gender'] === 'male') ? 'selected' : ''; ?>>Male</option>
-                <option value="female" <?php echo ($profile['gender'] === 'female') ? 'selected' : ''; ?>>Female</option>
-                <option value="other" <?php echo ($profile['gender'] === 'other') ? 'selected' : ''; ?>>Other</option>
-            </select>
-        </div>
+        
         <div class="form-group">
             <label for="address">Address</label>
             <textarea id="address" name="address"><?php echo htmlspecialchars($profile['address'] ?? ''); ?></textarea>
         </div>
+        
         <div class="form-group">
             <label for="city">City</label>
-            <input type="text" id="city" name="city" value="<?php echo htmlspecialchars($profile['city'] ?? ''); ?>">
+            <input type="text" id="city" name="city" 
+                   value="<?php echo htmlspecialchars($profile['city'] ?? ''); ?>">
         </div>
+        
         <div class="form-group">
             <label for="state">State / Province</label>
-            <input type="text" id="state" name="state" value="<?php echo htmlspecialchars($profile['state'] ?? ''); ?>">
+            <input type="text" id="state" name="state" 
+                   value="<?php echo htmlspecialchars($profile['state'] ?? ''); ?>">
         </div>
+        
         <div class="form-group">
             <label for="country">Country</label>
-            <input type="text" id="country" name="country" value="<?php echo htmlspecialchars($profile['country'] ?? 'India'); ?>">
-        </div>
-        <div class="form-group">
-            <label for="last_donation_date">Last Donation Date</label>
-            <input type="date" id="last_donation_date" name="last_donation_date" value="<?php echo htmlspecialchars($profile['last_donation_date'] ?? ''); ?>">
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" name="is_available" value="1" <?php echo $profile['is_available'] ? 'checked' : ''; ?>> I am currently available to donate
-            </label>
+            <input type="text" id="country" name="country" 
+                   value="<?php echo htmlspecialchars($profile['country'] ?? 'India'); ?>">
         </div>
         
         <h3 style="margin-top: 30px; color: #b91c1c;">Change Password (Optional)</h3>
@@ -201,8 +179,11 @@ include '../includes/header.php';
                    placeholder="Re-enter new password">
         </div>
         
-        <button type="submit" class="btn" style="width:100%;">Save Changes</button>
-        <p class="text-center mt-2"><a href="<?php echo baseUrl(); ?>/donor/dashboard.php">&larr; Back to Dashboard</a></p>
+        <button type="submit" class="btn" style="width: 100%;">Save Changes</button>
+        
+        <p class="text-center mt-2">
+            <a href="<?php echo baseUrl(); ?>/hospital/dashboard.php">&larr; Back to Dashboard</a>
+        </p>
     </form>
 </div>
 

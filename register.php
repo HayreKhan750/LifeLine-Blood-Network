@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/functions.php';
+require_once 'includes/email_service.php';
 
 if (isLoggedIn()) {
     redirect(baseUrl() . '/index.php');
@@ -10,7 +11,7 @@ $role = $_GET['role'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validateCsrf();
     $role = $_POST['role'] ?? '';
-    $email = trim($_POST['email'] ?? '');
+    $email = sanitizeEmail($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
@@ -18,10 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setFlash('Please provide a valid email address.', 'danger');
         redirect(baseUrl() . '/register.php');
     }
-    if (strlen($password) < 6) {
-        setFlash('Password must be at least 6 characters.', 'danger');
+    
+    // Validate password strength
+    $passwordErrors = validatePassword($password);
+    if (!empty($passwordErrors)) {
+        setFlash(implode('<br>', $passwordErrors), 'danger');
         redirect(baseUrl() . '/register.php?role=' . urlencode($role));
     }
+    
     if ($password !== $confirm) {
         setFlash('Passwords do not match.', 'danger');
         redirect(baseUrl() . '/register.php?role=' . urlencode($role));
@@ -81,6 +86,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['role'] = $role;
     $_SESSION['email'] = $email;
     session_regenerate_id(true);
+    
+    // Send welcome email
+    if ($role === 'donor') {
+        $donorName = trim($_POST['full_name'] ?? '');
+        EmailService::sendDonorWelcome($email, $donorName);
+    } else {
+        $hospitalName = trim($_POST['hospital_name'] ?? '');
+        EmailService::sendHospitalWelcome($email, $hospitalName);
+    }
+    
     setFlash('Registration successful! Welcome.', 'success');
     if ($role === 'donor') {
         redirect(baseUrl() . '/donor/dashboard.php');
@@ -122,7 +137,10 @@ include 'includes/header.php';
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required minlength="6" placeholder="Min 6 characters">
+            <input type="password" id="password" name="password" required minlength="8" placeholder="Min 8 characters">
+            <small style="color: #6b7280; display: block; margin-top: 5px;">
+                Must contain: 8+ chars, uppercase, lowercase, number, special character
+            </small>
         </div>
         <div class="form-group">
             <label for="confirm_password">Confirm Password</label>

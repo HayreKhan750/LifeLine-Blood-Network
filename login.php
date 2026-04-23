@@ -5,12 +5,23 @@ if (isLoggedIn()) {
     redirect(baseUrl() . '/index.php');
 }
 
+$rateLimitInfo = null;
+$identifier = ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . '|' . ($_POST['email'] ?? '');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validateCsrf();
-    $email = trim($_POST['email'] ?? '');
+    $email = sanitizeEmail($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    // Rate limiting check
+    if (isRateLimited($identifier)) {
+        $info = getRateLimitRemaining($identifier);
+        setFlash('Too many failed attempts. Please try again in ' . $info['minutes_remaining'] . ' minutes.', 'danger');
+        redirect(baseUrl() . '/login.php');
+    }
+
     if (!$email || !$password) {
+        recordLoginAttempt($identifier);
         setFlash('Please enter both email and password.', 'danger');
         redirect(baseUrl() . '/login.php');
     }
@@ -20,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+        // Clear rate limiting on successful login
+        clearLoginAttempts($identifier);
+        
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['email'] = $user['email'];
@@ -33,10 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect(baseUrl() . '/donor/dashboard.php');
         }
     } else {
-        setFlash('Invalid email or password.', 'danger');
+        recordLoginAttempt($identifier);
+        $remaining = getRateLimitRemaining($identifier);
+        $msg = 'Invalid email or password.';
+        if ($remaining['attempts_remaining'] > 0 && $remaining['attempts_remaining'] < 5) {
+            $msg .= ' (' . $remaining['attempts_remaining'] . ' attempts remaining)';
+        }
+        setFlash($msg, 'danger');
         redirect(baseUrl() . '/login.php');
     }
 }
+
+// Get rate limit info for display
+$rateLimitInfo = getRateLimitRemaining($identifier);
 
 include 'includes/header.php';
 ?>
@@ -54,7 +77,10 @@ include 'includes/header.php';
             <input type="password" id="password" name="password" required placeholder="Enter password">
         </div>
         <button type="submit" class="btn" style="width:100%;">Login</button>
-        <p class="text-center mt-2">Don't have an account? <a href="<?php echo baseUrl(); ?>/register.php">Register</a></p>
+        <p class="text-center mt-2">
+            <a href="<?php echo baseUrl(); ?>/forgot_password.php">Forgot password?</a>
+        </p>
+        <p class="text-center">Don't have an account? <a href="<?php echo baseUrl(); ?>/register.php">Register</a></p>
     </form>
 </div>
 

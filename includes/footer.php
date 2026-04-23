@@ -13,6 +13,7 @@
                     <li><a href="<?php echo baseUrl(); ?>/blood_banks.php">Blood Banks</a></li>
                     <li><a href="<?php echo baseUrl(); ?>/eligibility.php">Eligibility Check</a></li>
                     <li><a href="<?php echo baseUrl(); ?>/emergency.php">Emergency SOS</a></li>
+                    <li><a href="<?php echo baseUrl(); ?>/leaderboard.php">Leaderboard</a></li>
                 </ul>
             </div>
             <div>

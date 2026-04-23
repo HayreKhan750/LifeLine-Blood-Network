@@ -2138,9 +2138,9 @@ footer ul li a:hover {
 .gap-4 { gap: 32px; }
 
 .grid { display: grid; }
-.grid-2 { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-.grid-3 { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.grid-4 { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
 .w-full { width: 100%; }
 .h-full { height: 100%; }

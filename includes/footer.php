@@ -38,5 +38,6 @@
         </div>
     </div>
 </footer>
+<script src="<?php echo baseUrl(); ?>/assets/js/app.js"></script>
 </body>
 </html>

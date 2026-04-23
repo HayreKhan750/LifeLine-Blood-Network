@@ -25,7 +25,7 @@ $featuredDonors = $pdo->query("
     SELECT dp.full_name, dp.blood_type, dp.city, dp.is_available
     FROM donor_profiles dp JOIN users u ON dp.user_id = u.id
     WHERE u.is_active = 1 AND dp.is_available = 1
-    ORDER BY dp.last_donation_date DESC NULLS LAST
+    ORDER BY COALESCE(dp.last_donation_date, '1970-01-01') DESC
     LIMIT 5
 ")->fetchAll();
 

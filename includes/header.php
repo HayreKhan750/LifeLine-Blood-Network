@@ -27,7 +27,9 @@ $flash = getFlash();
             <a href="<?php echo baseUrl(); ?>/blood_banks.php">Blood Banks</a>
             <a href="<?php echo baseUrl(); ?>/eligibility.php">Eligibility</a>
             <a href="<?php echo baseUrl(); ?>/emergency.php">Emergency SOS</a>
+            <a href="<?php echo baseUrl(); ?>/leaderboard.php">Leaderboard</a>
             <?php if (isLoggedIn()): ?>
+                <a href="<?php echo baseUrl(); ?>/messages.php">Messages</a>
                 <?php if (isAdmin()): ?>
                     <a href="<?php echo baseUrl(); ?>/admin/dashboard.php">Admin</a>
                 <?php elseif (isDonor()): ?>

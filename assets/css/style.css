@@ -457,6 +457,24 @@ tr:hover { background: rgba(196,75,75,0.02); }
 .badge-fulfilled { background: #e2e8f0; color: #475569; }
 .badge-cancelled { background: #f1f5f9; color: #64748b; }
 
+/* ===== TIER BADGES ===== */
+.tier-bronze { color: #cd7f32; }
+.tier-silver { color: #94a3b8; }
+.tier-gold { color: #f59e0b; }
+.tier-platinum { color: #38bdf8; }
+.tier-diamond { color: #a855f7; }
+
+/* ===== BLOOD BADGE ===== */
+.blood-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
 /* ===== BLOOD TYPE EXPLORER ===== */
 .blood-explorer {
     display: grid;

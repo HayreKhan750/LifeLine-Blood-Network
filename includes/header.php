@@ -14,13 +14,19 @@ $flash = getFlash();
 <body>
 <header>
     <div class="container nav-container">
-        <a href="<?php echo baseUrl(); ?>/index.php" class="logo">LifeLine Blood Network</a>
+        <a href="<?php echo baseUrl(); ?>/index.php" class="logo">
+            <span class="logo-icon">&#9764;</span>
+            LifeLine
+        </a>
         <button class="mobile-menu-toggle" onclick="document.querySelector('header nav').classList.toggle('active')" aria-label="Toggle menu">
             <span></span><span></span><span></span>
         </button>
         <nav>
             <a href="<?php echo baseUrl(); ?>/index.php">Home</a>
             <a href="<?php echo baseUrl(); ?>/find_donors.php">Find Donors</a>
+            <a href="<?php echo baseUrl(); ?>/blood_banks.php">Blood Banks</a>
+            <a href="<?php echo baseUrl(); ?>/eligibility.php">Eligibility</a>
+            <a href="<?php echo baseUrl(); ?>/emergency.php">Emergency SOS</a>
             <?php if (isLoggedIn()): ?>
                 <?php if (isAdmin()): ?>
                     <a href="<?php echo baseUrl(); ?>/admin/dashboard.php">Admin</a>

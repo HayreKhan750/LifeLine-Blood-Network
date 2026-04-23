@@ -126,6 +126,30 @@ INSERT INTO users (email, password, role, is_active) VALUES
 -- Default password: 'SecureAdmin2024!' - CHANGE IMMEDIATELY AFTER FIRST LOGIN
 -- Use: password_hash('your_new_password', PASSWORD_DEFAULT) to generate
 
+CREATE TABLE IF NOT EXISTS blood_banks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    state VARCHAR(50) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(100),
+    operating_hours VARCHAR(100),
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+INSERT INTO blood_banks (name, address, city, state, phone, email, operating_hours) VALUES
+('Indian Red Cross Blood Bank', '1 Red Cross Marg, Near Connaught Place', 'New Delhi', 'Delhi', '+91-11-23716441', 'delhi@redcross.org', '24/7'),
+('Rotary TTK Blood Bank', '737 Anna Salai, Thousand Lights', 'Chennai', 'Tamil Nadu', '+91-44-28271333', 'info@rotaryttk.org', '8AM-8PM'),
+('Prathama Blood Centre', 'Opposite Old Civil Hospital, Asarwa', 'Ahmedabad', 'Gujarat', '+91-79-22681234', 'info@prathama.org', '24/7'),
+('Sankalp India Foundation', 'CA-37, 17th Cross, Malleshwaram', 'Bangalore', 'Karnataka', '+91-80-4121-0000', 'contact@sankalpindia.net', '9AM-6PM'),
+('Lions Blood Bank', '315, Dr. Annie Besant Road, Worli', 'Mumbai', 'Maharashtra', '+91-22-2493-5555', 'mumbai@lionsbloodbank.org', '8AM-10PM'),
+('Kolkata Blood Bank', '5 AJC Bose Road, Near Park Street', 'Kolkata', 'West Bengal', '+91-33-2225-4444', 'info@kolkatabloodbank.org', '24/7'),
+('Hyderabad Blood Centre', '6-1-1 Padmarao Nagar, Secunderabad', 'Hyderabad', 'Telangana', '+91-40-2781-2222', 'info@hydbloodcentre.org', '9AM-9PM'),
+('Jeevan Blood Bank', '72 Marshalls Road, Egmore', 'Chennai', 'Tamil Nadu', '+91-44-2827-3333', 'info@jeevan.org', '24/7');
+
 -- Performance Indexes for production use
 CREATE INDEX idx_donor_blood_type ON donor_profiles(blood_type);
 CREATE INDEX idx_donor_city ON donor_profiles(city);

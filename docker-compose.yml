@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: blood_donor_db
+      MYSQL_USER: blood_user
+      MYSQL_PASSWORD: blood_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql/setup.sql:/docker-entrypoint-initdb.d/01_setup.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: blood_donor_db
+      DB_USER: blood_user
+      DB_PASS: blood_pass
+      DB_CHARSET: utf8mb4
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_PATH: ""
+      SESSION_LIFETIME: "1440"
+      MAX_LOGIN_ATTEMPTS: "5"
+      LOGIN_LOCKOUT_MINUTES: "15"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+

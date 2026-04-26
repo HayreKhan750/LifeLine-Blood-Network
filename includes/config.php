@@ -22,7 +22,8 @@ class Config {
         }
 
         if (!file_exists($envPath)) {
-            throw new Exception('Environment file not found: ' . $envPath);
+            self::$loaded = true;
+            return;
         }
 
         $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -61,8 +62,21 @@ class Config {
         if (!self::$loaded) {
             self::load();
         }
-        
-        return self::$variables[$key] ?? $default;
+
+        if (array_key_exists($key, self::$variables)) {
+            return self::$variables[$key];
+        }
+
+        $envValue = getenv($key);
+        if ($envValue !== false) {
+            return (string) $envValue;
+        }
+
+        if (isset($_ENV[$key])) {
+            return (string) $_ENV[$key];
+        }
+
+        return $default;
     }
 
     /**

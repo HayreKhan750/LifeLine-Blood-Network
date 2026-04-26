@@ -293,7 +293,15 @@ function getHospitalProfile(PDO $pdo, int $user_id): ?array {
 
 // Base URL helper for portability
 function baseUrl(): string {
-    return '';
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
+    $scriptDir = dirname($scriptPath);
+    if ($scriptDir === '/' || $scriptDir === '\\') {
+        $scriptDir = '';
+    }
+    $appPath = Config::get('APP_PATH', '');
+    return $protocol . $host . $scriptDir . $appPath;
 }
 
 

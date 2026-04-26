@@ -25,8 +25,9 @@
         resize();
         window.addEventListener('resize', resize);
 
-        const PARTICLE_COUNT = Math.min(80, Math.floor(window.innerWidth / 20));
-        const CONNECTION_DISTANCE = 150;
+        const isMobile = window.innerWidth < 768;
+        const PARTICLE_COUNT = isMobile ? 30 : Math.min(80, Math.floor(window.innerWidth / 20));
+        const CONNECTION_DISTANCE = isMobile ? 100 : 150;
 
         class Particle {
             constructor() {
@@ -132,21 +133,32 @@
     // MOBILE MENU
     // =========================================================
     function initMobileMenu() {
-        const toggle = document.querySelector('.mobile-menu-toggle');
+        const toggle = document.getElementById('mobileMenuToggle');
         const nav = document.querySelector('.nav-links');
         if (!toggle || !nav) return;
 
         toggle.addEventListener('click', () => {
-            toggle.classList.toggle('active');
-            nav.classList.toggle('active');
+            const isActive = nav.classList.toggle('active');
+            toggle.classList.toggle('active', isActive);
+            toggle.setAttribute('aria-expanded', isActive.toString());
         });
 
         // Close on link click
         nav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                toggle.classList.remove('active');
                 nav.classList.remove('active');
+                toggle.classList.remove('active');
+                toggle.setAttribute('aria-expanded', 'false');
             });
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target) && !toggle.contains(e.target) && nav.classList.contains('active')) {
+                nav.classList.remove('active');
+                toggle.classList.remove('active');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 

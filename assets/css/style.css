@@ -2265,14 +2265,52 @@ footer ul li a:hover {
     h1 { font-size: 1.75rem; }
     h2 { font-size: 1.4rem; }
     h3 { font-size: 1.2rem; }
+
+    table { font-size: 0.85rem; }
+    th, td { padding: 12px 8px; }
+    .table-wrapper { margin: 0 -20px; border-radius: 0; border-left: none; border-right: none; }
 }
 
 @media (max-width: 480px) {
     .hero-stats-bar { grid-template-columns: 1fr 1fr; }
     .dashboard-grid { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.7rem; }
-    .btn { padding: 12px 20px; font-size: 0.9rem; }
+    .btn { padding: 14px 20px; font-size: 0.95rem; min-height: 48px; }
     .btn-large { padding: 16px 28px; }
     .hero-stat-value { font-size: 1.5rem; }
     .stat-card h3 { font-size: 2rem; }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 16px 14px;
+        font-size: 16px;
+    }
+
+    .nav-links a {
+        padding: 16px;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+
+    .mobile-menu-toggle {
+        padding: 14px;
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    .notification-dropdown {
+        left: 5px !important;
+        right: 5px !important;
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    .feature-card { padding: 24px 16px; }
+    .feature-icon { width: 60px; height: 60px; font-size: 1.5rem; }
+
+    .map-container { height: 300px; }
+
+    .testimonial-card { padding: 24px 20px; }
 }

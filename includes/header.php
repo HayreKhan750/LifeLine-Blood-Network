@@ -18,16 +18,17 @@ $flash = getFlash();
             <span class="logo-icon">&#9764;</span>
             LifeLine
         </a>
-        <button class="mobile-menu-toggle" onclick="document.querySelector('header nav').classList.toggle('active')" aria-label="Toggle menu">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
         </button>
-        <nav>
+        <nav class="nav-links">
             <a href="<?php echo baseUrl(); ?>/index.php">Home</a>
             <a href="<?php echo baseUrl(); ?>/find_donors.php">Find Donors</a>
             <a href="<?php echo baseUrl(); ?>/blood_banks.php">Blood Banks</a>
             <a href="<?php echo baseUrl(); ?>/eligibility.php">Eligibility</a>
             <a href="<?php echo baseUrl(); ?>/emergency.php">Emergency SOS</a>
             <a href="<?php echo baseUrl(); ?>/leaderboard.php">Leaderboard</a>
+            <a href="<?php echo baseUrl(); ?>/testimonials.php">Stories</a>
             <?php if (isLoggedIn()): ?>
                 <a href="<?php echo baseUrl(); ?>/messages.php">Messages</a>
                 <?php if (isAdmin()): ?>
